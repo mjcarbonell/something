@@ -29,14 +29,20 @@ public class MyNetworkManager : NetworkManager
             bool isGameLeader = GamePlayers.Count == 0; // isLeader is true if the player count is 0, aka when you are the first player to be added to a server/room
 
             GamePlayer GamePlayerInstance = Instantiate(gamePlayerPrefab);
-
+            
             GamePlayerInstance.IsGameLeader = isGameLeader;
             GamePlayerInstance.ConnectionId = conn.connectionId;
             GamePlayerInstance.playerNumber = GamePlayers.Count + 1;
+            
 
             GamePlayerInstance.playerSteamId = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.current_lobbyID, GamePlayers.Count);
 
             NetworkServer.AddPlayerForConnection(conn, GamePlayerInstance.gameObject);
+            if (conn.identity != null)
+                Debug.Log("Player spawned successfully.");
+            else
+                Debug.LogError("Player spawn failed.");
+
             Debug.Log("Player added. Player name: " + GamePlayerInstance.playerName + ". Player connection id: " + GamePlayerInstance.ConnectionId.ToString());
         }
     }
