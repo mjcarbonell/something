@@ -5,13 +5,22 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/Lobby.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/Game.unity
+    guid: d8d38352450e22c44a2ff8884fcf85df
+  - enabled: 0
+    path: Assets/Scenes/LobbyPartTwo.unity
+    guid: cbc4ac99fbaf8304eb0a53a3b8eae8b7
   - enabled: 1
     path: Assets/Scenes/Scene_Steamworks.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
-    path: Assets/Scenes/Scene_SteamworksGame.unity
-    guid: d8d38352450e22c44a2ff8884fcf85df
+    guid: 400c65140056b4541bf7602013af912d
   - enabled: 1
     path: Assets/Scenes/Scene_SteamworksLobby.unity
-    guid: cbc4ac99fbaf8304eb0a53a3b8eae8b7
+    guid: ea3a8572f05dfb84aaa0ca99f0f6fcb3
+  - enabled: 1
+    path: Assets/Scenes/Scene_SteamworksGame.unity
+    guid: 953ffa73b1059954cba22528bb0aee6c
   m_configObjects: {}
