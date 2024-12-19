@@ -5,36 +5,47 @@ using Mirror;
 using UnityEngine.SceneManagement; 
 public class PlayerMovementController : NetworkBehaviour
 {
-    public float speed = 1f;
-    public GameObject PlayerModel; 
+    [SyncVar] public float speed = 1f;
+    public GameObject PlayerModel;
     private Camera playerCamera;
-    private void Start(){
+
+    private void Start()
+    {
         playerCamera = GetComponentInChildren<Camera>();
         if (playerCamera != null)
         {
-            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
+            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for local player
         }
-        PlayerModel.SetActive(false); 
-    }
-    // working cameras
-    private void Update(){
-        if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
-            if(PlayerModel.activeSelf == false){
-                SetPosition(); 
-                PlayerModel.SetActive(true); 
-            }
-            if(hasAuthority){
-                Movement(); 
-            }
+
+        if (SceneManager.GetActiveScene().name == "Scene_SteamworksGame")
+        {
+            SetPosition(); // Randomly set initial position
         }
+
+        PlayerModel.SetActive(isLocalPlayer ? false : true); // Hide for local player
     }
-    public void Movement (){
-        float xDirection = Input.GetAxis("Horizontal"); 
-        float zDirection = Input.GetAxis("Vertical"); 
-        Vector3 moveDirection = new Vector3(xDirection, 0.0f,zDirection);
-        transform.position += moveDirection * speed; 
+
+    private void Update()
+    {
+        if (!isLocalPlayer || SceneManager.GetActiveScene().name != "Scene_SteamworksGame")
+        {
+            return;
+        }
+
+        Movement();
     }
-    public void SetPosition(){
-        transform.position = new Vector3(Random.Range(-5,5), 0.8f, Random.Range(-5,5)); 
+
+    public void Movement()
+    {
+        float xDirection = Input.GetAxis("Horizontal");
+        float zDirection = Input.GetAxis("Vertical");
+        Vector3 moveDirection = new Vector3(xDirection, 0.0f, zDirection).normalized;
+
+        transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
+    }
+
+    public void SetPosition()
+    {
+        transform.position = new Vector3(Random.Range(-5, 5), 0.8f, Random.Range(-5, 5));
     }
 }
