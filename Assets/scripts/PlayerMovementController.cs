@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : NetworkBehaviour
 {
-    public float speed = 1f;
+    [SyncVar] public float speed = 1f;
     public GameObject PlayerModel; 
     private Camera playerCamera;
     private void Start(){
@@ -20,9 +20,11 @@ public class PlayerMovementController : NetworkBehaviour
     // working cameras
     private void Update(){
         if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
-            if(PlayerModel.activeSelf == false){
-                SetPosition(); 
-                PlayerModel.SetActive(true); 
+            if (!PlayerModel.activeSelf && isLocalPlayer){
+                PlayerModel.SetActive(false); // Hide only for the local player
+            }
+            else{
+                PlayerModel.SetActive(true); // Show for other players
             }
             if(hasAuthority){
                 Movement(); 
