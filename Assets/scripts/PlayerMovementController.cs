@@ -20,11 +20,9 @@ public class PlayerMovementController : NetworkBehaviour
     // working cameras
     private void Update(){
         if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
-            if (!PlayerModel.activeSelf && isLocalPlayer){
-                PlayerModel.SetActive(false); // Hide only for the local player
-            }
-            else{
-                PlayerModel.SetActive(true); // Show for other players
+            if(PlayerModel.activeSelf == false){
+                SetPosition(); 
+                PlayerModel.SetActive(true); 
             }
             if(hasAuthority){
                 Movement(); 
