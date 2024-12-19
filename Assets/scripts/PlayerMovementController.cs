@@ -9,8 +9,12 @@ public class PlayerMovementController : NetworkBehaviour
     public GameObject PlayerModel; 
     private Camera playerCamera;
     private void Start(){
+        playerCamera = GetComponentInChildren<Camera>();
+        if (playerCamera != null)
+        {
+            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
+        }
         PlayerModel.SetActive(false); 
-        playerCamera.gameObject.SetActive(isLocalPlayer);
     }
     private void Update(){
 
