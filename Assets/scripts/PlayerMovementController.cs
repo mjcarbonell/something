@@ -16,8 +16,8 @@ public class PlayerMovementController : NetworkBehaviour
         }
         PlayerModel.SetActive(false); 
     }
+    // working cameras
     private void Update(){
-
         if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
             if(PlayerModel.activeSelf == false){
                 SetPosition(); 
