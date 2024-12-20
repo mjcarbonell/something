@@ -13,7 +13,6 @@ public class PickUp : NetworkBehaviour
     private GameObject heldObj;
     private Rigidbody heldObjRb;
     private int LayerNumber;
-
     void Start()
     {
         if (playerCamera != null)

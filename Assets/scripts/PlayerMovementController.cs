@@ -31,17 +31,17 @@ public class PlayerMovementController : NetworkBehaviour
             }
             if(hasAuthority){
                 Movement(); 
+                CameraMovement(); 
             }
             if(isLocalPlayer){
                 // Get mouse input
-                float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-                float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-                playerBody.Rotate(Vector3.up * mouseX);
-                xRotation -= mouseY;
-                xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
-                playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
-                // here sdas
-                holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
+                // float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+                // float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+                // playerBody.Rotate(Vector3.up * mouseX);
+                // xRotation -= mouseY;
+                // xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
+                // playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
+                // holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
             }
         }
     }
@@ -60,6 +60,15 @@ public class PlayerMovementController : NetworkBehaviour
             // Apply movement with speed and deltaTime
             transform.position += moveDirection * speed * Time.deltaTime;
         }
+    }
+    public void CameraMovement(){
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        playerBody.Rotate(Vector3.up * mouseX);
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
+        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
+        holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
     }
     public void SetPosition(){
         transform.position = new Vector3(Random.Range(-5,5), 0.8f, Random.Range(-5,5)); 
