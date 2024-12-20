@@ -40,7 +40,7 @@ public class PlayerMovementController : NetworkBehaviour
                 xRotation -= mouseY;
                 xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
                 playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
-                // here 
+                // here sdas
                 holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
             }
         }
