@@ -27,10 +27,17 @@ public class PickUp : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
+            if (playerCamera != null)
+            {
+                playerCamera.gameObject.SetActive(true);
+            }
+            if (holdPos != null)
+            {
+                holdPos.gameObject.SetActive(true);
+            }
             playerCamera.gameObject.SetActive(true);
             holdPos.gameObject.SetActive(true); 
-            if (Input.GetKeyDown(KeyCode.E))
-            {
+            if (Input.GetKeyDown(KeyCode.E)){
                 if (heldObj == null)
                 {
                     // Try to pick up an object
