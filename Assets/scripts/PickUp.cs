@@ -35,8 +35,6 @@ public class PickUp : NetworkBehaviour
             {
                 holdPos.gameObject.SetActive(true);
             }
-            playerCamera.gameObject.SetActive(true);
-            holdPos.gameObject.SetActive(true); 
             if (Input.GetKeyDown(KeyCode.E)){
                 if (heldObj == null)
                 {

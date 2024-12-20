@@ -1758,7 +1758,8 @@ MonoBehaviour:
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 2947731914659614966, guid: d6674ce072c6a8643b481f5e282e2f3a, type: 3}
   gamePlayerPrefab: {fileID: 6777906575338827274, guid: d5ebc752c19faee42b19b97bcb0145e8,
     type: 3}
   minPlayers: 1
