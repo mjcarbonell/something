@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6995137863607239683}
   - component: {fileID: 7786031165678655871}
   - component: {fileID: -6678213679335150097}
+  - component: {fileID: 6480933211054882405}
   m_Layer: 0
   m_Name: basketball
   m_TagString: canPickUp
@@ -109,7 +110,7 @@ MeshCollider:
   m_GameObject: {fileID: 2947731914659614966}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Convex: 1
   m_CookingOptions: 30
@@ -168,3 +169,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+--- !u!135 &6480933211054882405
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2947731914659614966}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.00552537
+  m_Center: {x: 0, y: 0.00000013480891, z: -0.000002124812}
