@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : NetworkBehaviour
 {
+    [SyncVar(hook = nameof(OnPlayerBodyRotationChanged))]
+    private Quaternion playerBodyRotation; // SyncVar for playerBody rotation
+
     [SyncVar] public float speed;
     public GameObject PlayerModel;
     public GameObject holdPos;
@@ -62,18 +65,28 @@ public class PlayerMovementController : NetworkBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
+        // Rotate playerBody and camera
         playerBody.Rotate(Vector3.up * mouseX);
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        Quaternion cameraRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        playerCamera.transform.localRotation = cameraRotation;
+        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // playerBody.Rotate(Vector3.left * mouseY); 
-
-        // Update holdPos rotation locally
-        // holdPos.transform.localRotation = cameraRotation;
+        // Sync playerBody rotation across the network
+        CmdUpdatePlayerBodyRotation(playerBody.rotation);
     }
+
+    [Command]
+    private void CmdUpdatePlayerBodyRotation(Quaternion newRotation)
+    {
+        playerBodyRotation = newRotation; // Update SyncVar
+    }
+
+    private void OnPlayerBodyRotationChanged(Quaternion oldRotation, Quaternion newRotation)
+    {
+        playerBody.rotation = newRotation; // Apply rotation on all clients
+    }
+
     public void SetPosition()
     {
         transform.position = new Vector3(Random.Range(-5, 5), 0.8f, Random.Range(-5, 5));
