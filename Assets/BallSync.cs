@@ -5,7 +5,6 @@ public class BallSync : NetworkBehaviour
 {
     private Rigidbody rb;
 
-    // SyncVars to synchronize state between clients
     [SyncVar] private Vector3 syncPosition;
     [SyncVar] private Quaternion syncRotation;
     [SyncVar] private Vector3 syncVelocity;
@@ -45,13 +44,13 @@ public class BallSync : NetworkBehaviour
             // Calculate the collision force based on impact and player velocity
             Vector3 collisionForce = collision.relativeVelocity * rb.mass;
 
-            // Notify the server to apply the force
-            CmdApplyForce(collisionForce);
+            // Notify the server to apply the force without requiring authority
+            CmdApplyForceWithoutAuthority(collisionForce);
         }
     }
 
-    [Command] // Command executed on the server
-    private void CmdApplyForce(Vector3 force)
+    [Command(requiresAuthority = false)] // Allows command without client ownership
+    private void CmdApplyForceWithoutAuthority(Vector3 force)
     {
         // Apply the force to the ball's rigidbody
         rb.AddForce(force, ForceMode.Impulse);
