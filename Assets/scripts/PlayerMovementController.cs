@@ -14,9 +14,6 @@ public class PlayerMovementController : NetworkBehaviour
     public Transform playerBody;          // Reference to the player's body (root object)
     private float xRotation = 0f;         // Track the camera's up/down rotation
 
-    [SyncVar(hook = nameof(OnHoldPosRotationChanged))]
-    private Quaternion holdPosRotation;   // SyncVar to sync holdPos rotation across clients
-
     private void Start()
     {
         playerCamera = GetComponentInChildren<Camera>();
@@ -42,9 +39,6 @@ public class PlayerMovementController : NetworkBehaviour
                 Movement();
                 CameraMovement();
             }
-
-            // Apply holdPos rotation on all clients
-            ApplyHoldPosRotation();
         }
     }
 
@@ -75,32 +69,11 @@ public class PlayerMovementController : NetworkBehaviour
         Quaternion cameraRotation = Quaternion.Euler(xRotation, 0f, 0f);
         playerCamera.transform.localRotation = cameraRotation;
 
+        // playerBody.Rotate(Vector3.left * mouseY); 
+
         // Update holdPos rotation locally
-        holdPos.transform.localRotation = cameraRotation;
-
-        // Sync the holdPos rotation across the network
-        CmdUpdateHoldPosRotation(cameraRotation);
+        // holdPos.transform.localRotation = cameraRotation;
     }
-
-    [Command]
-    private void CmdUpdateHoldPosRotation(Quaternion newRotation)
-    {
-        holdPosRotation = newRotation;
-    }
-
-    private void OnHoldPosRotationChanged(Quaternion oldRotation, Quaternion newRotation)
-    {
-        holdPos.transform.localRotation = newRotation;
-    }
-
-    private void ApplyHoldPosRotation()
-    {
-        if (!isLocalPlayer)
-        {
-            holdPos.transform.localRotation = holdPosRotation;
-        }
-    }
-
     public void SetPosition()
     {
         transform.position = new Vector3(Random.Range(-5, 5), 0.8f, Random.Range(-5, 5));
