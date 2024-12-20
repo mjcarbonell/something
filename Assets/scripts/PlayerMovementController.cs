@@ -1,56 +1,59 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror; 
-using UnityEngine.SceneManagement; 
+using Mirror;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : NetworkBehaviour
 {
     [SyncVar] public float speed;
-    public GameObject PlayerModel; 
-    public GameObject holdPos; 
+    public GameObject PlayerModel;
+    public GameObject holdPos;
     private Camera playerCamera;
     public float mouseSensitivity = 100f; // Sensitivity for mouse movement
     public Transform playerBody;          // Reference to the player's body (root object)
     private float xRotation = 0f;         // Track the camera's up/down rotation
-    private void Start(){
+
+    // SyncVar to sync holdPos rotation
+    [SyncVar(hook = nameof(OnHoldPosRotationChanged))]
+    private Quaternion holdPosRotation;
+
+    private void Start()
+    {
         playerCamera = GetComponentInChildren<Camera>();
         if (playerCamera != null)
         {
             playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
         }
-        PlayerModel.SetActive(false); 
+        PlayerModel.SetActive(false);
     }
-    // working cameras
-    private void Update(){
-        if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
-            if(PlayerModel.activeSelf == false){
-                SetPosition(); 
+
+    private void Update()
+    {
+        if (SceneManager.GetActiveScene().name == "Scene_SteamworksGame")
+        {
+            if (PlayerModel.activeSelf == false)
+            {
+                SetPosition();
                 Cursor.lockState = CursorLockMode.Locked;
-                PlayerModel.SetActive(true); 
+                PlayerModel.SetActive(true);
             }
-            if(hasAuthority){
-                Movement(); 
-                CameraMovement(); 
-            }
-            if(isLocalPlayer){
-                // Get mouse input
-                // float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-                // float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-                // playerBody.Rotate(Vector3.up * mouseX);
-                // xRotation -= mouseY;
-                // xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
-                // playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
-                // holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
+            if (hasAuthority)
+            {
+                Movement();
+                CameraMovement();
             }
         }
     }
-    public void Movement() {
+
+    public void Movement()
+    {
         float xDirection = Input.GetAxis("Horizontal");
         float zDirection = Input.GetAxis("Vertical");
 
         // Check if movement input exists
-        if (xDirection != 0 || zDirection != 0) {
+        if (xDirection != 0 || zDirection != 0)
+        {
             // Calculate the movement direction relative to the player's facing direction
             Vector3 moveDirection = playerBody.transform.right * xDirection + playerBody.transform.forward * zDirection;
 
@@ -61,16 +64,41 @@ public class PlayerMovementController : NetworkBehaviour
             transform.position += moveDirection * speed * Time.deltaTime;
         }
     }
-    public void CameraMovement(){
+
+    public void CameraMovement()
+    {
+        if (!isLocalPlayer) return;
+
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+
         playerBody.Rotate(Vector3.up * mouseX);
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
-        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
-        holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        Quaternion cameraRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        playerCamera.transform.localRotation = cameraRotation;
+
+        // Update holdPos rotation locally
+        holdPos.transform.localRotation = cameraRotation;
+
+        // Sync the holdPos rotation across the network
+        CmdUpdateHoldPosRotation(cameraRotation);
     }
-    public void SetPosition(){
-        transform.position = new Vector3(Random.Range(-5,5), 0.8f, Random.Range(-5,5)); 
+
+    [Command]
+    private void CmdUpdateHoldPosRotation(Quaternion newRotation)
+    {
+        holdPosRotation = newRotation;
+    }
+
+    private void OnHoldPosRotationChanged(Quaternion oldRotation, Quaternion newRotation)
+    {
+        holdPos.transform.localRotation = newRotation;
+    }
+
+    public void SetPosition()
+    {
+        transform.position = new Vector3(Random.Range(-5, 5), 0.8f, Random.Range(-5, 5));
     }
 }
