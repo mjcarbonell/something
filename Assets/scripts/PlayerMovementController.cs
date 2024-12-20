@@ -42,6 +42,9 @@ public class PlayerMovementController : NetworkBehaviour
                 Movement();
                 CameraMovement();
             }
+
+            // Apply holdPos rotation on all clients
+            ApplyHoldPosRotation();
         }
     }
 
@@ -88,6 +91,14 @@ public class PlayerMovementController : NetworkBehaviour
     private void OnHoldPosRotationChanged(Quaternion oldRotation, Quaternion newRotation)
     {
         holdPos.transform.localRotation = newRotation;
+    }
+
+    private void ApplyHoldPosRotation()
+    {
+        if (!isLocalPlayer)
+        {
+            holdPos.transform.localRotation = holdPosRotation;
+        }
     }
 
     public void SetPosition()
