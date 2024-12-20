@@ -14,10 +14,6 @@ public class PlayerMovementController : NetworkBehaviour
     public Transform playerBody;          // Reference to the player's body (root object)
     private float xRotation = 0f;         // Track the camera's up/down rotation
 
-    // SyncVar to sync holdPos rotation
-    [SyncVar(hook = nameof(OnHoldPosRotationChanged))]
-    private Quaternion holdPosRotation;
-
     private void Start()
     {
         playerCamera = GetComponentInChildren<Camera>();
@@ -43,6 +39,12 @@ public class PlayerMovementController : NetworkBehaviour
                 Movement();
                 CameraMovement();
             }
+
+            // Rotate holdPos for local players
+            if (isLocalPlayer)
+            {
+                UpdateHoldPosRotation();
+            }
         }
     }
 
@@ -51,16 +53,10 @@ public class PlayerMovementController : NetworkBehaviour
         float xDirection = Input.GetAxis("Horizontal");
         float zDirection = Input.GetAxis("Vertical");
 
-        // Check if movement input exists
         if (xDirection != 0 || zDirection != 0)
         {
-            // Calculate the movement direction relative to the player's facing direction
             Vector3 moveDirection = playerBody.transform.right * xDirection + playerBody.transform.forward * zDirection;
-
-            // Normalize the movement direction
             moveDirection = moveDirection.normalized;
-
-            // Apply movement with speed and deltaTime
             transform.position += moveDirection * speed * Time.deltaTime;
         }
     }
@@ -78,23 +74,15 @@ public class PlayerMovementController : NetworkBehaviour
 
         Quaternion cameraRotation = Quaternion.Euler(xRotation, 0f, 0f);
         playerCamera.transform.localRotation = cameraRotation;
-
-        // Update holdPos rotation locally
-        holdPos.transform.localRotation = cameraRotation;
-
-        // Sync the holdPos rotation across the network
-        CmdUpdateHoldPosRotation(cameraRotation);
     }
 
-    [Command]
-    private void CmdUpdateHoldPosRotation(Quaternion newRotation)
+    private void UpdateHoldPosRotation()
     {
-        holdPosRotation = newRotation;
-    }
-
-    private void OnHoldPosRotationChanged(Quaternion oldRotation, Quaternion newRotation)
-    {
-        holdPos.transform.localRotation = newRotation;
+        // Ensure holdPos follows the local player's camera rotation
+        if (playerCamera != null && holdPos != null)
+        {
+            holdPos.transform.rotation = playerCamera.transform.rotation;
+        }
     }
 
     public void SetPosition()
