@@ -41,7 +41,7 @@ public class BallSync : NetworkBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("HERE"); 
+            // Debug.Log("HERE"); 
             // Calculate the collision force based on impact and player velocity
             Vector3 collisionForce = collision.relativeVelocity * rb.mass;
 

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror; 
-using UnityEngine.SceneManagement; 
+using Mirror;
+
 public class PickUp : NetworkBehaviour
 {
     public Camera playerCamera;
@@ -18,91 +18,126 @@ public class PickUp : NetworkBehaviour
 
     void Start()
     {
-        if (playerCamera != null){
+        if (playerCamera != null)
+        {
             playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
         }
         LayerNumber = LayerMask.NameToLayer("holdLayer");
     }
-    void Update(){
-        if(isLocalPlayer){
-            if(Input.GetKeyDown(KeyCode.G)){
-                if(heldObj != null){
-                }
-            }
-            if(Input.GetKeyDown(KeyCode.E)){
-                if(heldObj == null){
+
+    void Update()
+    {
+        if (isLocalPlayer)
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                if (heldObj == null)
+                {
                     RaycastHit hit;
-                    if(Physics.Raycast(playerCamera.transform.position, playerCamera.transform.TransformDirection(Vector3.forward), out hit, pickUpRange)){
-                        Debug.Log(hit.transform.gameObject.tag);
-                        if(hit.transform.gameObject.tag == "canPickUp"){
-                            pickUpObject(hit.transform.gameObject);       
+                    if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.TransformDirection(Vector3.forward), out hit, pickUpRange))
+                    {
+                        if (hit.transform.gameObject.CompareTag("canPickUp"))
+                        {
+                            CmdPickUpObject(hit.transform.gameObject); // Command to pick up the object
                         }
                     }
                 }
-                else{
-                    if(canDrop == true){
-                        StopClipping();
-                        dropObject();
+                else
+                {
+                    if (canDrop)
+                    {
+                        CmdDropObject(); // Command to drop the object
                     }
-                } 
+                }
             }
-            if(Input.GetKeyDown(KeyCode.F)){
-                if(heldObj != null){
-                    StopClipping();
-                    ThrowObject();
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                if (heldObj != null)
+                {
+                    CmdThrowObject(); // Command to throw the object
                 }
             }
         }
-        
     }
 
-    void pickUpObject(GameObject pickUpObj){
-        if(pickUpObj.GetComponent<Rigidbody>()){
+    [Command]
+    void CmdPickUpObject(GameObject pickUpObj)
+    {
+        if (pickUpObj.GetComponent<Rigidbody>())
+        {
             heldObj = pickUpObj;
             heldObjRb = pickUpObj.GetComponent<Rigidbody>();
             heldObjRb.isKinematic = true;
-            heldObjRb.transform.parent = holdPos.transform;
 
-            // Set object position and rotation relative to the holding position
+            heldObj.transform.SetParent(holdPos.transform); // Set parent on the server
             heldObj.transform.position = holdPos.position;
             heldObj.transform.rotation = holdPos.rotation;
 
             heldObj.layer = LayerNumber;
-            Physics.IgnoreCollision(heldObj.GetComponent<Collider>(), player.GetComponent<Collider>(), true);
+
+            // Sync with all clients
+            RpcPickUpObject(heldObj);
         }
     }
 
-    void dropObject(){
-        Physics.IgnoreCollision(heldObj.GetComponent<Collider>(), player.GetComponent<Collider>(), false);
-        heldObj.layer = 0;
-        heldObjRb.isKinematic = false;
-        heldObjRb.transform.parent = null;
-        heldObj = null;
-    }
+    [ClientRpc]
+    void RpcPickUpObject(GameObject pickUpObj)
+    {
+        if (!isServer)
+        {
+            heldObj = pickUpObj;
+            heldObjRb = pickUpObj.GetComponent<Rigidbody>();
+            heldObjRb.isKinematic = true;
 
-    void MoveObject(){
-        if (heldObj != null) {
-            // Ensure the object maintains the same position and rotation
+            heldObj.transform.SetParent(holdPos.transform);
             heldObj.transform.position = holdPos.position;
             heldObj.transform.rotation = holdPos.rotation;
+
+            heldObj.layer = LayerNumber;
         }
     }
 
-    void ThrowObject(){
-        Physics.IgnoreCollision(heldObj.GetComponent<Collider>(), player.GetComponent<Collider>(), false);
-        heldObj.layer = 0;
-        heldObjRb.isKinematic = false;
-        heldObjRb.transform.parent = null;
-        heldObjRb.AddForce(playerCamera.transform.forward*throwForce);
-        heldObj = null;
+    [Command]
+    void CmdDropObject()
+    {
+        if (heldObj != null)
+        {
+            RpcDropObject();
+        }
     }
-    
-    void StopClipping(){
-        var clipRange = Vector3.Distance(heldObj.transform.position, playerCamera.transform.position);
-        RaycastHit[] hits;
-        hits = Physics.RaycastAll(playerCamera.transform.position, playerCamera.transform.TransformDirection(Vector3.forward), clipRange);
-        if(hits.Length > 1){
-            heldObj.transform.position = playerCamera.transform.position + new Vector3(0f, -0.5f, 0f);
+
+    [ClientRpc]
+    void RpcDropObject()
+    {
+        if (heldObj != null)
+        {
+            heldObj.layer = 0;
+            heldObjRb.isKinematic = false;
+            heldObj.transform.SetParent(null);
+            heldObj = null;
+        }
+    }
+
+    [Command]
+    void CmdThrowObject()
+    {
+        if (heldObj != null)
+        {
+            RpcThrowObject(playerCamera.transform.forward);
+        }
+    }
+
+    [ClientRpc]
+    void RpcThrowObject(Vector3 direction)
+    {
+        if (heldObj != null)
+        {
+            heldObj.layer = 0;
+            heldObjRb.isKinematic = false;
+            heldObj.transform.SetParent(null);
+            heldObjRb.AddForce(direction * throwForce);
+            heldObj = null;
         }
     }
 }
