@@ -9,7 +9,6 @@ public class PlayerMovementController : NetworkBehaviour
     [SyncVar] public float speed;
     public GameObject PlayerModel; 
     private Camera playerCamera;
-
     public float mouseSensitivity = 100f; // Sensitivity for mouse movement
     public Transform playerBody;          // Reference to the player's body (root object)
     private float xRotation = 0f;         // Track the camera's up/down rotation
