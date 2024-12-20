@@ -8,6 +8,7 @@ public class PlayerMovementController : NetworkBehaviour
 {
     [SyncVar] public float speed;
     public GameObject PlayerModel; 
+    public GameObject holdPos; 
     private Camera playerCamera;
     public float mouseSensitivity = 100f; // Sensitivity for mouse movement
     public Transform playerBody;          // Reference to the player's body (root object)
@@ -39,6 +40,8 @@ public class PlayerMovementController : NetworkBehaviour
                 xRotation -= mouseY;
                 xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
                 playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
+                // here 
+                holdPos.gameObject.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); 
             }
         }
     }

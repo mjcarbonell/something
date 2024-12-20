@@ -314,6 +314,7 @@ MonoBehaviour:
   syncInterval: 0.1
   speed: 5
   PlayerModel: {fileID: 1225280310765828593}
+  holdPos: {fileID: 7629034009264201902}
   mouseSensitivity: 100
   playerBody: {fileID: 4701254665294100144}
 --- !u!114 &8898251910770904627
