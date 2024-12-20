@@ -6,22 +6,21 @@ using Mirror;
 public class PickUp : NetworkBehaviour
 {
     public Camera playerCamera;
-    public Transform holdPos;
+    public GameObject player;
+    public Transform holdPos; // Position where the held object will be attached
     public float throwForce = 500f;
     public float pickUpRange = 5f;
-
     private GameObject heldObj;
     private Rigidbody heldObjRb;
-
-    private int holdLayer;
+    private int LayerNumber;
 
     void Start()
     {
         if (playerCamera != null)
         {
-            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable the camera only for the local player
+            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
         }
-        holdLayer = LayerMask.NameToLayer("holdLayer");
+        LayerNumber = LayerMask.NameToLayer("holdLayer");
     }
 
     void Update()
@@ -32,71 +31,73 @@ public class PickUp : NetworkBehaviour
             {
                 if (heldObj == null)
                 {
-                    TryPickUpObject();
+                    // Try to pick up an object
+                    RaycastHit hit;
+                    if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.TransformDirection(Vector3.forward), out hit, pickUpRange))
+                    {
+                        if (hit.transform.gameObject.CompareTag("canPickUp"))
+                        {
+                            CmdPickUpObject(hit.transform.gameObject, netIdentity); // Pass the object and player's NetworkIdentity
+                        }
+                    }
                 }
                 else
                 {
-                    DropObject();
+                    // Drop the object
+                    CmdDropObject();
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.F) && heldObj != null)
             {
-                ThrowObject();
-            }
-
-            if (heldObj != null)
-            {
-                MoveHeldObject();
-            }
-        }
-    }
-
-    void TryPickUpObject()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, pickUpRange))
-        {
-            if (hit.collider.CompareTag("canPickUp"))
-            {
-                CmdPickUpObject(hit.collider.gameObject);
+                // Throw the object
+                CmdThrowObject();
             }
         }
     }
 
     [Command]
-    void CmdPickUpObject(GameObject obj)
+    void CmdPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity)
     {
-        RpcPickUpObject(obj, holdPos.gameObject);
-    }
-
-    [ClientRpc]
-    void RpcPickUpObject(GameObject obj, GameObject holder)
-    {
-        heldObj = obj;
-        heldObjRb = obj.GetComponent<Rigidbody>();
-
-        if (heldObjRb != null)
+        if (pickUpObj.GetComponent<Rigidbody>())
         {
-            heldObjRb.isKinematic = true; // Disable physics
-            heldObj.transform.SetParent(holder.transform); // Parent to the holder
-            heldObj.transform.localPosition = Vector3.zero; // Reset local position
-            heldObj.layer = holdLayer; // Set to "holdLayer" to avoid collisions
+            heldObj = pickUpObj;
+            heldObjRb = pickUpObj.GetComponent<Rigidbody>();
+            heldObjRb.isKinematic = true;
+
+            // Assign the object's parent to the player's holdPos
+            Transform holdPosition = playerIdentity.GetComponent<PickUp>().holdPos;
+            pickUpObj.transform.SetParent(holdPosition);
+
+            // Sync with all clients
+            RpcPickUpObject(pickUpObj, playerIdentity);
         }
     }
 
-    void DropObject()
+    [ClientRpc]
+    void RpcPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity)
     {
-        if (heldObj != null)
+        if (pickUpObj != null)
         {
-            CmdDropObject();
+            Transform holdPosition = playerIdentity.GetComponent<PickUp>().holdPos;
+
+            heldObj = pickUpObj;
+            heldObjRb = pickUpObj.GetComponent<Rigidbody>();
+            heldObjRb.isKinematic = true;
+
+            pickUpObj.transform.SetParent(holdPosition);
+            pickUpObj.transform.position = holdPosition.position;
+            pickUpObj.transform.rotation = holdPosition.rotation;
         }
     }
 
     [Command]
     void CmdDropObject()
     {
-        RpcDropObject();
+        if (heldObj != null)
+        {
+            RpcDropObject();
+        }
     }
 
     [ClientRpc]
@@ -104,25 +105,20 @@ public class PickUp : NetworkBehaviour
     {
         if (heldObj != null)
         {
-            heldObj.layer = 0; // Reset to default layer
-            heldObjRb.isKinematic = false; // Re-enable physics
-            heldObj.transform.SetParent(null); // Unparent the object
+            heldObj.layer = 0;
+            heldObjRb.isKinematic = false;
+            heldObj.transform.SetParent(null);
             heldObj = null;
         }
     }
 
-    void ThrowObject()
+    [Command]
+    void CmdThrowObject()
     {
         if (heldObj != null)
         {
-            CmdThrowObject(playerCamera.transform.forward);
+            RpcThrowObject(playerCamera.transform.forward);
         }
-    }
-
-    [Command]
-    void CmdThrowObject(Vector3 direction)
-    {
-        RpcThrowObject(direction);
     }
 
     [ClientRpc]
@@ -130,20 +126,11 @@ public class PickUp : NetworkBehaviour
     {
         if (heldObj != null)
         {
-            heldObj.layer = 0; // Reset to default layer
-            heldObjRb.isKinematic = false; // Re-enable physics
-            heldObj.transform.SetParent(null); // Unparent the object
-            heldObjRb.AddForce(direction * throwForce); // Add force for throwing
+            heldObj.layer = 0;
+            heldObjRb.isKinematic = false;
+            heldObj.transform.SetParent(null);
+            heldObjRb.AddForce(direction * throwForce);
             heldObj = null;
-        }
-    }
-
-    void MoveHeldObject()
-    {
-        if (heldObj != null)
-        {
-            heldObj.transform.position = holdPos.position; // Keep the object at the hold position
-            heldObj.transform.rotation = holdPos.rotation;
         }
     }
 }
