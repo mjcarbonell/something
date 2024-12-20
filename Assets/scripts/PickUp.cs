@@ -62,7 +62,7 @@ public class PickUp : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     void CmdPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity)
     {
         if (pickUpObj.GetComponent<Rigidbody>())
@@ -97,7 +97,7 @@ public class PickUp : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     void CmdDropObject()
     {
         if (heldObj != null)
@@ -118,7 +118,7 @@ public class PickUp : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     void CmdThrowObject()
     {
         if (heldObj != null)
