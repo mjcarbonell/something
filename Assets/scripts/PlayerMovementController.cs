@@ -1,65 +1,62 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Mirror;
 using UnityEngine;
-using Mirror; 
-using UnityEngine.SceneManagement; 
 
-public class PlayerMovementController : NetworkBehaviour
+public class BallSync : NetworkBehaviour
 {
-    [SyncVar] public float speed;
-    public GameObject PlayerModel; 
-    private Camera playerCamera;
-    public float mouseSensitivity = 100f; // Sensitivity for mouse movement
-    public Transform playerBody;          // Reference to the player's body (root object)
-    private float xRotation = 0f;         // Track the camera's up/down rotation
-    private void Start(){
-        playerCamera = GetComponentInChildren<Camera>();
-        if (playerCamera != null)
+    private Rigidbody rb;
+
+    [SyncVar] private Vector3 syncPosition;
+    [SyncVar] private Quaternion syncRotation;
+    [SyncVar] private Vector3 syncVelocity;
+    [SyncVar] private Vector3 syncAngularVelocity;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
+    private void FixedUpdate()
+    {
+        if (isServer) // Server handles ball physics
         {
-            Debug.Log("non null"); 
-            playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
+            // Update SyncVars with the ball's current state
+            syncPosition = rb.position;
+            syncRotation = rb.rotation;
+            syncVelocity = rb.velocity;
+            syncAngularVelocity = rb.angularVelocity;
         }
-        PlayerModel.SetActive(false); 
-    }
-    // working cameras
-    private void Update(){
-        if(SceneManager.GetActiveScene().name == "Scene_SteamworksGame"){
-            if(PlayerModel.activeSelf == false){
-                SetPosition(); 
-                Cursor.lockState = CursorLockMode.Locked;
-                PlayerModel.SetActive(true); 
-            }
-            if(hasAuthority){
-                Movement(); 
-            }
-            if(isLocalPlayer){
-                // Get mouse input
-                float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-                float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-                playerBody.Rotate(Vector3.up * mouseX);
-                xRotation -= mouseY;
-                xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Clamping to avoid looking too far up/down
-                playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // Apply rotation to the camera
-            }
+        else // Non-server clients interpolate to match the server state
+        {
+            // Smoothly interpolate position and rotation for visual consistency
+            rb.position = Vector3.Lerp(rb.position, syncPosition, Time.deltaTime * 10);
+            rb.rotation = Quaternion.Lerp(rb.rotation, syncRotation, Time.deltaTime * 10);
+
+            // Set velocities to align with server state
+            rb.velocity = syncVelocity;
+            rb.angularVelocity = syncAngularVelocity;
         }
     }
-    public void Movement() {
-        float xDirection = Input.GetAxis("Horizontal");
-        float zDirection = Input.GetAxis("Vertical");
 
-        // Check if movement input exists
-        if (xDirection != 0 || zDirection != 0) {
-            // Calculate the movement direction relative to the player's facing direction
-            Vector3 moveDirection = playerBody.transform.right * xDirection + playerBody.transform.forward * zDirection;
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // Calculate the collision force based on impact and player velocity
+            Vector3 collisionForce = collision.relativeVelocity * rb.mass;
 
-            // Normalize the movement direction
-            moveDirection = moveDirection.normalized;
-
-            // Apply movement with speed and deltaTime
-            transform.position += moveDirection * speed * Time.deltaTime;
+            // Notify the server to apply the force without requiring authority
+            CmdApplyForceWithoutAuthority(collisionForce);
         }
     }
-    public void SetPosition(){
-        transform.position = new Vector3(Random.Range(-5,5), 0.8f, Random.Range(-5,5)); 
+
+    [Command(requiresAuthority = false)] // Allows command without client ownership
+    private void CmdApplyForceWithoutAuthority(Vector3 force)
+    {
+        // Apply the force to the ball's rigidbody
+        rb.AddForce(force, ForceMode.Impulse);
+
+        // Update the SyncVars with the new state
+        syncVelocity = rb.velocity;
+        syncAngularVelocity = rb.angularVelocity;
     }
 }
