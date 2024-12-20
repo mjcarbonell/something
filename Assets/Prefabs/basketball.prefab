@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3740396717287272739}
   - component: {fileID: 3134160816423251569}
   - component: {fileID: 8490840928662120742}
+  - component: {fileID: 6995137863607239683}
   m_Layer: 0
   m_Name: basketball
   m_TagString: canPickUp
@@ -111,3 +112,20 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4711208715938537054, guid: 83a305d85443a0e468926a740a7bef75, type: 3}
+--- !u!114 &6995137863607239683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2947731914659614966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  visible: 0
+  m_AssetId: d6674ce072c6a8643b481f5e282e2f3a
+  hasSpawned: 0
