@@ -14,7 +14,6 @@ public class BallSync : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody>();
     }
-
     private void FixedUpdate()
     {
         if (isServer) // Server handles ball physics
