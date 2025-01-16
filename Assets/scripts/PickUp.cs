@@ -13,36 +13,28 @@ public class PickUp : NetworkBehaviour
     private GameObject heldObj;
     private Rigidbody heldObjRb;
     private int LayerNumber;
-    void Start()
-    {
-        if (playerCamera != null)
-        {
+    void Start(){
+        if (playerCamera != null){
             playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
         }
         LayerNumber = LayerMask.NameToLayer("holdLayer");
     }
 
-    void Update()
-    {
-        if (isLocalPlayer)
-        {
-            if (playerCamera != null)
-            {
+    void Update(){
+        if (isLocalPlayer){
+            if (playerCamera != null){
                 playerCamera.gameObject.SetActive(true);
             }
-            if (holdPos != null)
-            {
+            if (holdPos != null){
                 holdPos.gameObject.SetActive(true);
             }
             if (Input.GetKeyDown(KeyCode.E)){
-                if (heldObj == null)
-                {
+                if (heldObj == null){
                     // Try to pick up an object
                     RaycastHit hit;
                     if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.TransformDirection(Vector3.forward), out hit, pickUpRange))
                     {
-                        if (hit.transform.gameObject.CompareTag("canPickUp"))
-                        {
+                        if (hit.transform.gameObject.CompareTag("canPickUp")){
                             CmdPickUpObject(hit.transform.gameObject, netIdentity); // Pass the object and player's NetworkIdentity
                         }
                     }
@@ -54,8 +46,7 @@ public class PickUp : NetworkBehaviour
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.F) && heldObj != null)
-            {
+            if (Input.GetKeyDown(KeyCode.F) && heldObj != null){
                 // Throw the object
                 CmdThrowObject();
             }
@@ -63,10 +54,8 @@ public class PickUp : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    void CmdPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity)
-    {
-        if (pickUpObj.GetComponent<Rigidbody>())
-        {
+    void CmdPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity){
+        if (pickUpObj.GetComponent<Rigidbody>()){
             heldObj = pickUpObj;
             heldObjRb = pickUpObj.GetComponent<Rigidbody>();
             heldObjRb.isKinematic = true;
@@ -81,10 +70,8 @@ public class PickUp : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity)
-    {
-        if (pickUpObj != null)
-        {
+    void RpcPickUpObject(GameObject pickUpObj, NetworkIdentity playerIdentity){
+        if (pickUpObj != null){
             Transform holdPosition = playerIdentity.GetComponent<PickUp>().holdPos;
 
             heldObj = pickUpObj;
@@ -98,19 +85,15 @@ public class PickUp : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    void CmdDropObject()
-    {
-        if (heldObj != null)
-        {
+    void CmdDropObject(){
+        if (heldObj != null){
             RpcDropObject();
         }
     }
 
     [ClientRpc]
-    void RpcDropObject()
-    {
-        if (heldObj != null)
-        {
+    void RpcDropObject(){
+        if (heldObj != null){
             heldObj.layer = 0;
             heldObjRb.isKinematic = false;
             heldObj.transform.SetParent(null);
@@ -119,19 +102,15 @@ public class PickUp : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    void CmdThrowObject()
-    {
-        if (heldObj != null)
-        {
+    void CmdThrowObject(){
+        if (heldObj != null){
             RpcThrowObject(playerCamera.transform.forward);
         }
     }
 
     [ClientRpc]
-    void RpcThrowObject(Vector3 direction)
-    {
-        if (heldObj != null)
-        {
+    void RpcThrowObject(Vector3 direction){
+        if (heldObj != null){
             heldObj.layer = 0;
             heldObjRb.isKinematic = false;
             heldObj.transform.SetParent(null);
