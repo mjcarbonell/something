@@ -1020,6 +1020,7 @@ namespace Mirror
         public static void RegisterStartPosition(Transform start)
         {
             // Debug.Log("RegisterStartPosition: (" + start.gameObject.name + ") " + start.position);
+            Debug.Log($"Registering Start Position: {start.name}");
             startPositions.Add(start);
 
             // reorder the list so that round-robin spawning uses the start positions
