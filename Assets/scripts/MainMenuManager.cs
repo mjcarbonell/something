@@ -85,16 +85,11 @@ public class MainMenuManager : MonoBehaviour
 
         SteamLobby.instance.GetListOfLobbies();
     }
-    public void DisplayLobbies(List<CSteamID> lobbyIDS, LobbyDataUpdate_t result)
-    {
-        for (int i = 0; i < lobbyIDS.Count; i++)
-        {
-            if (lobbyIDS[i].m_SteamID == result.m_ulSteamIDLobby)
-            {
+    public void DisplayLobbies(List<CSteamID> lobbyIDS, LobbyDataUpdate_t result){
+        for (int i = 0; i < lobbyIDS.Count; i++){
+            if (lobbyIDS[i].m_SteamID == result.m_ulSteamIDLobby){
                 Debug.Log("Lobby " + i + " :: " + SteamMatchmaking.GetLobbyData((CSteamID)lobbyIDS[i].m_SteamID, "name") + " number of players: " + SteamMatchmaking.GetNumLobbyMembers((CSteamID)lobbyIDS[i].m_SteamID).ToString() + " max players: " + SteamMatchmaking.GetLobbyMemberLimit((CSteamID)lobbyIDS[i].m_SteamID).ToString());
-
-                if (didPlayerSearchForLobbies)
-                {
+                if (didPlayerSearchForLobbies){
                     Debug.Log("OnGetLobbyInfo: Player searched for lobbies");
                     if (SteamMatchmaking.GetLobbyData((CSteamID)lobbyIDS[i].m_SteamID, "name").ToLower().Contains(searchBox.text.ToLower()))
                     {

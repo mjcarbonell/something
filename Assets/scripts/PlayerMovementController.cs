@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class PlayerMovementController : NetworkBehaviour
 {
-    [SyncVar(hook = nameof(OnPlayerBodyRotationChanged))]
-    private Quaternion playerBodyRotation; // SyncVar for playerBody rotation
+    [SyncVar(hook = nameof(OnCameraRotationChanged))]
+    private Quaternion cameraRotationGlobal; // SyncVar for camera rotation
 
     [SyncVar] public float speed;
     public GameObject PlayerModel;
@@ -73,18 +73,22 @@ public class PlayerMovementController : NetworkBehaviour
 
         // Sync playerBody rotation across the network
         // WE NEED TO SHARE THIS ROTATION NOT JUST ON LOCAL PLAYER SCREEN BUT ON ALL PLAYERS SCREENS
-        CmdUpdatePlayerBodyRotation(playerBody.rotation);
+        CmdUpdateRotations(playerCamera.transform.localRotation);
+
     }
 
     [Command]
-    private void CmdUpdatePlayerBodyRotation(Quaternion newRotation)
+    private void CmdUpdateRotations(Quaternion newCameraRotation)
     {
-        playerBodyRotation = newRotation; // Update SyncVar
+        cameraRotationGlobal = newCameraRotation; // Update camera rotation SyncVar
     }
 
-    private void OnPlayerBodyRotationChanged(Quaternion oldRotation, Quaternion newRotation)
+    private void OnCameraRotationChanged(Quaternion oldRotation, Quaternion newRotation)
     {
-        playerBody.rotation = newRotation; // Apply rotation on all clients
+        if (playerCamera != null)
+        {
+            playerCamera.transform.localRotation = newRotation; // Apply rotation on all clients
+        }
     }
 
     public void SetPosition()
