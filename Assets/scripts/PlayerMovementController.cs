@@ -73,6 +73,7 @@ public class PlayerMovementController : NetworkBehaviour
         playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         // Sync playerBody rotation across the network
+        // WE NEED TO SHARE THIS ROTATION NOT JUST ON LOCAL PLAYER SCREEN BUT ON ALL PLAYERS SCREENS
         CmdUpdatePlayerBodyRotation(playerBody.rotation);
     }
 
