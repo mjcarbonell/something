@@ -27,6 +27,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 2863173975391674733}
+  - {fileID: 580680117801316846}
   - {fileID: 4701254665294100144}
   m_Father: {fileID: 6141406830019278474}
   m_RootOrder: 0
@@ -60,8 +62,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 580680117801316846}
-  m_RootOrder: 1
+  m_Father: {fileID: 8236139490470444836}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &4260423495979477659
 Camera:
@@ -145,10 +147,9 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 580680117801316846}
+  m_Children: []
   m_Father: {fileID: 8236139490470444836}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6955417479286143041
 MeshFilter:
@@ -355,7 +356,6 @@ MonoBehaviour:
   syncInterval: 0.1
   speed: 5
   PlayerModel: {fileID: 1225280310765828593}
-  holdPos: {fileID: 7629034009264201902}
   mouseSensitivity: 100
   playerBody: {fileID: 4701254665294100144}
 --- !u!114 &8898251910770904627
@@ -502,9 +502,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2657922738287189916}
-  - {fileID: 2863173975391674733}
-  m_Father: {fileID: 4701254665294100144}
-  m_RootOrder: 0
+  m_Father: {fileID: 8236139490470444836}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &5522707749146507019
 Camera:
