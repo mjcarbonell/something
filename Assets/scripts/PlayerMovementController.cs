@@ -22,7 +22,7 @@ public class PlayerMovementController : NetworkBehaviour
         playerCamera = GetComponentInChildren<Camera>();
         if (playerCamera != null){
             if(isLocalPlayer || isServer){
-                playerCamera.gameObject.SetActive(isLocalPlayer); // Enable camera only for the local player
+                playerCamera.gameObject.SetActive(true); // for server?
             }
         }
         PlayerModel.SetActive(false);
