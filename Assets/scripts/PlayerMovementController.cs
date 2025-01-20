@@ -11,7 +11,7 @@ public class PlayerMovementController : NetworkBehaviour
 
     [SyncVar] public float speed;
     public GameObject PlayerModel;
-    public GameObject holdPos;
+    // public GameObject holdPos;
     private Camera playerCamera;
     public float mouseSensitivity = 100f; // Sensitivity for mouse movement
     public Transform playerBody;          // Reference to the player's body (root object)
@@ -69,25 +69,25 @@ public class PlayerMovementController : NetworkBehaviour
         playerBody.Rotate(Vector3.up * mouseX);
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        // Sync playerBody rotation across the network
-        // WE NEED TO SHARE THIS ROTATION NOT JUST ON LOCAL PLAYER SCREEN BUT ON ALL PLAYERS SCREENS
-        CmdUpdateRotations(playerCamera.transform.localRotation);
-
+        
+        // playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        Quaternion newCameraRotation = Quaternion.Euler(xRotation, playerBody.rotation.eulerAngles.y, 0f);
+        playerCamera.transform.rotation = newCameraRotation;
+        CmdUpdateCameraRotation(playerCamera.transform.rotation);
     }
 
     [Command]
-    private void CmdUpdateRotations(Quaternion newCameraRotation)
+    private void CmdUpdateCameraRotation(Quaternion newCameraRotation)
     {
-        cameraRotationGlobal = newCameraRotation; // Update camera rotation SyncVar
+        // Update the SyncVar to reflect the new rotation
+        cameraRotationGlobal = newCameraRotation;
     }
-
     private void OnCameraRotationChanged(Quaternion oldRotation, Quaternion newRotation)
     {
-        if (playerCamera != null)
+        // Apply the updated rotation for non-local players
+        if (!isLocalPlayer && playerCamera != null)
         {
-            playerCamera.transform.localRotation = newRotation; // Apply rotation on all clients
+            playerCamera.transform.localRotation = newRotation;
         }
     }
 
