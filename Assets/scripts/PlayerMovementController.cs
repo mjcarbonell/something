@@ -25,7 +25,7 @@ public class PlayerMovementController : NetworkBehaviour
                 playerCamera.gameObject.SetActive(true); // for server?
             }
         }
-        PlayerModel.SetActive(false);
+        // PlayerModel.SetActive(false);
     }
 
     private void Update()
